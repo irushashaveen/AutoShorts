@@ -1,4 +1,5 @@
 from app.database import Base, engine
+from app.models.user import User
 from app.models.creator import Creator
 from app.models.task import Task, TaskStatus
 from app.models.fingerprint import AudioFingerprint
@@ -9,6 +10,7 @@ from app.models.log import TaskLog
 __all__ = [
     "Base",
     "engine",
+    "User",
     "Creator",
     "Task",
     "TaskStatus",

@@ -56,3 +56,4 @@ try {
 Write-Host "`n==========================================================" -ForegroundColor Cyan
 Write-Host "  Verification Complete!                                  " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
+
