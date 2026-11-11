@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title if title else "Login · AutoShorts Control Plane" }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#131b2e',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-600 selection:text-white">
+
+    <div class="w-full max-w-md">
+        <!-- Brand Logo Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex w-12 h-12 rounded-xl bg-indigo-600 items-center justify-center font-bold text-2xl text-white shadow-xl shadow-indigo-600/30 mb-3">
+                ⚡
+            </div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">AutoShorts</h1>
+            <p class="text-xs text-slate-400 mt-1">Autonomous Content Curation & Publishing System</p>
+        </div>
+
+        <!-- Login Container Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl backdrop-blur">
+            <h2 class="text-base font-semibold text-white mb-1">Operator Authentication</h2>
+            <p class="text-xs text-slate-400 mb-6">Enter your authorized credentials to access the pipeline workspace.</p>
+
+            {% if error %}
+                <div class="mb-5 p-3 rounded-lg bg-rose-950/50 border border-rose-800/80 text-rose-300 text-xs flex items-center space-x-2">
+                    <span>⚠️</span>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <form action="/login" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                        Username
+                    </label>
+                    <input type="text" name="username" required autofocus
+                           value="{{ username if username else '' }}"
+                           placeholder="admin"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                        Password
+                    </label>
+                    <input type="password" name="password" required
+                           placeholder="••••••••••••"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2.5 px-4 rounded-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2 mt-2">
+                    <span>Sign In to Control Plane</span>
+                    <span>➔</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer Notice -->
+        <div class="text-center mt-6 text-xs text-slate-500">
+            <span>Protected by Recca Labs Infrastructure · Oracle Cloud ARM64</span>
+        </div>
+    </div>
+
+</body>
+</html>
+

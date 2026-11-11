@@ -110,3 +110,4 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
             detail="Authentication required"
         )
     return user
+

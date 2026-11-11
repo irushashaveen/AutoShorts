@@ -11,12 +11,13 @@ from sqlalchemy import or_
 
 from app.database import get_db
 from app.config import settings
-from app.models import Task, Creator, TaskStatus, AnalyticsCache
+from app.models import Task, Creator, TaskStatus, AnalyticsCache, User
 from app.schemas.task import TaskResponse
 from app.services.extraction import URLSanitizer, InvalidTikTokURLError
 from app.services.youtube import QuotaTracker, AnalyticsScheduler
 from app.services.ai import MetadataEngine
 from app.core.events import broadcaster
+from app.core.security import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,11 @@ templates.env.filters["from_json"] = from_json_filter
 
 
 @router.get("/", response_class=HTMLResponse)
-def get_dashboard(request: Request, db: Session = Depends(get_db)):
+def get_dashboard(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Render the dark-mode main operational workspace."""
     tasks = db.query(Task).order_by(Task.created_at.desc()).limit(50).all()
     quota_used = QuotaTracker.get_today_consumption(db)
@@ -59,6 +64,8 @@ def get_dashboard(request: Request, db: Session = Depends(get_db)):
     peak_hour = cached.peak_hour_utc if cached else settings.DEFAULT_PUBLISH_HOUR_UTC
     avg_duration = cached.avg_view_duration if cached else 0.0
 
+    user_context = current_user if isinstance(current_user, User) else None
+
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
@@ -71,6 +78,7 @@ def get_dashboard(request: Request, db: Session = Depends(get_db)):
             "published_count": published_count,
             "peak_hour": peak_hour,
             "avg_view_duration": avg_duration,
+            "current_user": user_context,
             "title": "AutoShorts - Autonomous Shorts Publishing"
         }
     )
@@ -80,6 +88,7 @@ def get_dashboard(request: Request, db: Session = Depends(get_db)):
 def submit_video_url(
     request: Request,
     url: str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Intake endpoint for TikTok URLs submitted from Web or Telegram."""
@@ -127,6 +136,7 @@ def approve_and_schedule(
     task_id: str,
     title: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Operator approval: saves edited title/description and schedules publication."""
@@ -162,6 +172,7 @@ def update_metadata(
     task_id: str,
     title: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Inline metadata editor for modifying titles and descriptions."""
@@ -188,6 +199,7 @@ def update_metadata(
 def regenerate_ai_metadata(
     request: Request,
     task_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Re-executes AI metadata generation via Gemini or Ollama."""
@@ -222,7 +234,11 @@ def regenerate_ai_metadata(
 
 
 @router.delete("/api/queue/{task_id}", response_class=HTMLResponse)
-def discard_task(task_id: str, db: Session = Depends(get_db)):
+def discard_task(
+    task_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Deletes task and staging files from disk."""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:

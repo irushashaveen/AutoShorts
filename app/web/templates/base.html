@@ -27,15 +27,15 @@
     <style>
         /* Touch target minimum sizes */
         button, a, input {
-            min-height: 40px;
+            min-height: 38px;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #090d16;
         }
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
@@ -44,27 +44,70 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #334155;
         }
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-600 selection:text-white"
       hx-ext="sse" sse-connect="/api/events/stream">
 
     <!-- Top Navigation Header -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30">
-                    ⚡
-                </div>
-                <div>
-                    <h1 class="text-base font-bold text-white leading-tight">AutoShorts</h1>
-                    <p class="text-xs text-slate-400">Autonomous TikTok ➔ YouTube Shorts Pipeline</p>
-                </div>
+            <div class="flex items-center space-x-6">
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition">
+                        ⚡
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="text-sm font-bold text-white leading-tight">AutoShorts</h1>
+                            <span class="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-800/60 font-mono px-1.5 py-0.2 rounded">v0.1.0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">shorts.reccalab.com</p>
+                    </div>
+                </a>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex items-center space-x-1 text-xs font-semibold">
+                    <a href="/" class="px-3 py-1.5 rounded-lg text-slate-200 hover:text-white hover:bg-slate-800/60 transition">
+                        Staged Queue
+                    </a>
+                    <a href="/admin/users" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        User Access
+                    </a>
+                </nav>
             </div>
 
-            <!-- YouTube Quota Gauge & Health -->
-            <div id="quota-gauge-container" class="flex items-center space-x-4">
-                {% include "partials/quota_gauge.html" %}
+            <!-- YouTube Quota Gauge & User Profile -->
+            <div class="flex items-center space-x-4">
+                <div id="quota-gauge-container" class="hidden sm:flex items-center">
+                    {% if quota_used is defined %}
+                        {% include "partials/quota_gauge.html" %}
+                    {% endif %}
+                </div>
+
+                {% if current_user %}
+                <div class="flex items-center space-x-3 pl-3 border-l border-slate-800">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-xs font-semibold text-white">{{ current_user.username }}</div>
+                        <div class="text-[10px] text-emerald-400">● Online</div>
+                    </div>
+                    <a href="/logout"
+                       title="Sign Out"
+                       class="text-xs text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 p-2 rounded-lg border border-transparent hover:border-rose-900 transition flex items-center space-x-1">
+                        <span>🚪</span>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </header>
@@ -76,4 +119,3 @@
 
 </body>
 </html>
-

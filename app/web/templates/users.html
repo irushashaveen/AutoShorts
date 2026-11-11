@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Navigation Bar -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <div class="flex items-center space-x-2">
+                <a href="/" class="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center space-x-1">
+                    <span>←</span>
+                    <span>Back to Staged Queue</span>
+                </a>
+            </div>
+            <h2 class="text-xl font-bold text-white mt-1">User & Operator Access Management</h2>
+            <p class="text-xs text-slate-400">Manage operator permissions and credentials for the AutoShorts deployment.</p>
+        </div>
+
+        <div class="flex items-center space-x-2 text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+            <span>Signed in as:</span>
+            <span class="font-bold text-white">{{ current_user.username }}</span>
+            <span class="bg-indigo-950 text-indigo-300 border border-indigo-800 px-1.5 py-0.2 rounded text-[10px]">ADMIN</span>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="p-3 rounded-lg bg-rose-950/50 border border-rose-800 text-rose-300 text-xs flex items-center space-x-2">
+            <span>⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left 2 Cols: Registered Users List Table -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+                <span>👥</span>
+                <span>Active Operators & Administrators ({{ users|length }})</span>
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                        <tr>
+                            <th class="py-2.5 px-3">User</th>
+                            <th class="py-2.5 px-3">Role</th>
+                            <th class="py-2.5 px-3">Status</th>
+                            <th class="py-2.5 px-3">Created</th>
+                            <th class="py-2.5 px-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        {% for user in users %}
+                        <tr id="user-row-{{ user.id }}" class="hover:bg-slate-850/50 transition">
+                            <td class="py-3 px-3">
+                                <div class="font-semibold text-white">{{ user.username }}</div>
+                                <div class="text-[11px] text-slate-400">{{ user.email }}</div>
+                            </td>
+                            <td class="py-3 px-3">
+                                {% if user.is_admin %}
+                                    <span class="bg-indigo-950/80 text-indigo-300 border border-indigo-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                                        Admin
+                                    </span>
+                                {% else %}
+                                    <span class="bg-slate-800 text-slate-300 text-[10px] font-medium px-2 py-0.5 rounded-full">
+                                        Operator
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-3">
+                                {% if user.is_active %}
+                                    <span class="text-emerald-400 font-medium flex items-center space-x-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                                        <span>Active</span>
+                                    </span>
+                                {% else %}
+                                    <span class="text-rose-400 font-medium flex items-center space-x-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block"></span>
+                                        <span>Disabled</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-3 text-slate-400">
+                                {{ user.created_at.strftime("%Y-%m-%d") }}
+                            </td>
+                            <td class="py-3 px-3 text-right space-x-2">
+                                {% if user.id != current_user.id %}
+                                    <form action="/admin/users/{{ user.id }}/toggle" method="POST" class="inline">
+                                        <button type="submit" class="text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+                                            {{ "Disable" if user.is_active else "Enable" }}
+                                        </button>
+                                    </form>
+
+                                    <button hx-delete="/admin/users/{{ user.id }}"
+                                            hx-confirm="Are you sure you want to delete user '{{ user.username }}'?"
+                                            hx-target="#user-row-{{ user.id }}"
+                                            hx-swap="outerHTML"
+                                            class="text-[11px] px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-900">
+                                        Delete
+                                    </button>
+                                {% else %}
+                                    <span class="text-[10px] text-slate-500 italic">Current Session</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right 1 Col: Create New User Form -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm h-fit">
+            <h3 class="text-sm font-bold text-white mb-2 flex items-center space-x-2">
+                <span>➕</span>
+                <span>Add New Operator</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">Provision credentials for team members or secondary operators.</p>
+
+            <form action="/admin/users/create" method="POST" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-semibold uppercase tracking-wider text-slate-400 mb-1 text-[10px]">
+                        Username
+                    </label>
+                    <input type="text" name="username" required
+                           placeholder="john_editor"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase tracking-wider text-slate-400 mb-1 text-[10px]">
+                        Email Address
+                    </label>
+                    <input type="email" name="email"
+                           placeholder="john@reccalab.com"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase tracking-wider text-slate-400 mb-1 text-[10px]">
+                        Password
+                    </label>
+                    <input type="password" name="password" required minlength="6"
+                           placeholder="••••••••••••"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="is_admin" name="is_admin" value="true"
+                           class="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-0">
+                    <label for="is_admin" class="text-slate-300 font-medium">Grant Full Administrator Rights</label>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-3 rounded-lg shadow-md shadow-indigo-600/20 transition mt-2">
+                    Create Operator Account
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+

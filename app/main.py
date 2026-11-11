@@ -5,6 +5,7 @@ from pathlib import Path
 from app.config import settings
 from app.models import init_db
 from app.web.router import router as web_router
+from app.web.auth_router import auth_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +21,9 @@ app = FastAPI(
 
 # Initialize database schema tables
 init_db()
+
+# Mount authentication and user administration router
+app.include_router(auth_router)
 
 # Mount web dashboard router
 app.include_router(web_router)
