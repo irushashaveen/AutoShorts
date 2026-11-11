@@ -1,0 +1,43 @@
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <!-- Card 1: Queue Volume -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-400">Active Queue Volume</p>
+        <div class="mt-2 flex items-baseline space-x-2">
+            <span class="text-2xl font-bold text-white">{{ queue_count }}</span>
+            <span class="text-xs text-slate-400">staged videos</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-400 flex space-x-3">
+            <span class="text-emerald-400 font-medium">{{ ready_count }} Ready</span>
+            <span class="text-amber-400 font-medium">{{ flagged_count }} Flagged</span>
+        </div>
+    </div>
+
+    <!-- Card 2: Published Shorts (30d) -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-400">Shorts Published (30d)</p>
+        <div class="mt-2 flex items-baseline space-x-2">
+            <span class="text-2xl font-bold text-emerald-400">{{ published_count }}</span>
+            <span class="text-xs text-slate-400">uploads</span>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Autonomous 5MB chunk distribution</p>
+    </div>
+
+    <!-- Card 3: Peak Audience Window -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-400">Peak Audience Window</p>
+        <div class="mt-2 flex items-baseline space-x-2">
+            <span class="text-2xl font-bold text-indigo-400">{{ peak_hour }}:00 UTC</span>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Dynamically queried from Analytics</p>
+    </div>
+
+    <!-- Card 4: Average View Duration -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-400">Audience Retention (AVD)</p>
+        <div class="mt-2 flex items-baseline space-x-2">
+            <span class="text-2xl font-bold text-white">{{ avg_view_duration }}s</span>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Targeting > 85% completion rate</p>
+    </div>
+</div>
+

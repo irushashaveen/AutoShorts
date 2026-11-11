@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- Top Metrics Overview Bar -->
+    {% include "partials/metrics_bar.html" %}
+
+    <!-- Fast Link Submission Form -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-8 shadow-md">
+        <h2 class="text-sm font-semibold text-white mb-2 flex items-center space-x-2">
+            <span>📥</span>
+            <span>Submit TikTok Video for Autonomous Processing</span>
+        </h2>
+        <form hx-post="/api/queue/submit"
+              hx-target="#queue-container"
+              hx-swap="afterbegin"
+              hx-indicator="#submit-spinner"
+              class="flex flex-col sm:flex-row gap-3">
+            <input type="url" name="url" required
+                   placeholder="Paste TikTok video or share link (e.g. https://www.tiktok.com/@creator/video/... or vm.tiktok.com/...)"
+                   class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-6 py-2.5 rounded-lg flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition">
+                <span>Ingest & Process</span>
+                <span id="submit-spinner" class="htmx-indicator animate-spin">🔄</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Live Staging Queue Section Header -->
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+            <span>📺</span>
+            <span>Staged Media & Review Queue</span>
+        </h3>
+        <div class="flex items-center space-x-2 text-xs">
+            <span class="text-slate-400">Auto-refreshing via SSE</span>
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+    </div>
+
+    <!-- Staged Video Cards Container -->
+    <div id="queue-container" class="space-y-4" sse-swap="queue_updated">
+        {% if tasks %}
+            {% for task in tasks %}
+                {% include "partials/queue_card.html" %}
+            {% endfor %}
+        {% else %}
+            <div id="empty-queue-placeholder" class="bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-12 text-center">
+                <span class="text-4xl block mb-2">📥</span>
+                <h4 class="text-base font-semibold text-slate-300">Queue is Currently Empty</h4>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                    Paste a TikTok link in the bar above or share directly from your mobile phone to your Telegram bot.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
