@@ -1,0 +1,4 @@
+"""
+AutoShorts Test Suite
+"""
+
