@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     deploy:
@@ -30,7 +30,7 @@ services:
     container_name: autoshorts_ollama
     restart: unless-stopped
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     deploy:
@@ -46,6 +46,7 @@ services:
 
   # ---------------------------------------------------------------------------
   # Control Dashboard & Web API (FastAPI + HTMX + SSE)
+  # Internal Only: Bound strictly to localhost; Reverse-Proxied via Nginx
   # ---------------------------------------------------------------------------
   web:
     build:
@@ -62,7 +63,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - OLLAMA_BASE_URL=http://ollama:11434
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./data:/app/data
     depends_on:
@@ -73,9 +74,14 @@ services:
         limits:
           cpus: "0.5"
           memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   # ---------------------------------------------------------------------------
-  # Background Task Worker (Celery + FFmpeg + yt-dlp)
+  # Heavy Media Processing & Curation Worker (Celery)
   # ---------------------------------------------------------------------------
   celery_worker:
     build:
@@ -129,7 +135,43 @@ services:
           cpus: "0.2"
           memory: 256M
 
+  # ---------------------------------------------------------------------------
+  # Production Ingress: Nginx Reverse Proxy (Zero Open Raw Ports)
+  # Exposes only Port 80 and 443 to the public internet
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: autoshorts_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    depends_on:
+      - web
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # SSL Certificate Automation (Let's Encrypt Certbot)
+  # ---------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: autoshorts_certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
 volumes:
   redis_data:
   ollama_data:
-
+  certbot_conf:
+  certbot_www:

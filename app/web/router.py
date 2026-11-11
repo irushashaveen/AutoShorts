@@ -17,7 +17,7 @@ from app.services.extraction import URLSanitizer, InvalidTikTokURLError
 from app.services.youtube import QuotaTracker, AnalyticsScheduler
 from app.services.ai import MetadataEngine
 from app.core.events import broadcaster
-from app.core.security import get_current_user
+from app.core.deps import get_current_user, require_role
 
 logger = logging.getLogger(__name__)
 

@@ -86,13 +86,13 @@
                             </td>
                             <td class="py-3 px-3 text-right space-x-2">
                                 {% if user.id != current_user.id %}
-                                    <form action="/admin/users/{{ user.id }}/toggle" method="POST" class="inline">
+                                    <form action="/users/{{ user.id }}/toggle" method="POST" class="inline">
                                         <button type="submit" class="text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
                                             {{ "Disable" if user.is_active else "Enable" }}
                                         </button>
                                     </form>
 
-                                    <button hx-delete="/admin/users/{{ user.id }}"
+                                    <button hx-delete="/users/{{ user.id }}"
                                             hx-confirm="Are you sure you want to delete user '{{ user.username }}'?"
                                             hx-target="#user-row-{{ user.id }}"
                                             hx-swap="outerHTML"
@@ -118,7 +118,7 @@
             </h3>
             <p class="text-xs text-slate-400 mb-4">Provision credentials for team members or secondary operators.</p>
 
-            <form action="/admin/users/create" method="POST" class="space-y-3.5 text-xs">
+            <form action="/users/create" method="POST" class="space-y-3.5 text-xs">
                 <div>
                     <label class="block font-semibold uppercase tracking-wider text-slate-400 mb-1 text-[10px]">
                         Username
@@ -146,15 +146,19 @@
                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
                 </div>
 
-                <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="is_admin" name="is_admin" value="true"
-                           class="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-0">
-                    <label for="is_admin" class="text-slate-300 font-medium">Grant Full Administrator Rights</label>
+                <div>
+                    <label class="block font-semibold uppercase tracking-wider text-slate-400 mb-1 text-[10px]">
+                        Role & Access Tier
+                    </label>
+                    <select name="role" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <option value="operator" selected>Operator (Queue Review & URL Intake)</option>
+                        <option value="admin">Administrator (Full Access & User Mgmt)</option>
+                    </select>
                 </div>
 
                 <button type="submit"
                         class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-3 rounded-lg shadow-md shadow-indigo-600/20 transition mt-2">
-                    Create Operator Account
+                    Create User Account
                 </button>
             </form>
         </div>
